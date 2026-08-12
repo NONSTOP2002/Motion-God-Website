@@ -144,49 +144,46 @@ footer{border-top:1px solid var(--line);padding:35px 0;color:var(--muted);font-s
 </div></footer>
 
 <script>
-let cart = JSON.parse(localStorage.getItem('motionGodCart')) || [];
 
-document.querySelectorAll('.btn.primary').forEach(button => {
+let cart = [];
 
-  if (button.textContent.includes('Add to Cart')) {
+try {
 
-    button.addEventListener('click', () => {
+  const savedCart = localStorage.getItem('motionGodCart');
 
-      const product = button.closest('.card');
+  if (savedCart) {
 
-      const name = product.querySelector('h3').textContent.trim();
-
-      const existingItem = cart.find(item => item.name === name);
-
-      if (existingItem) {
-
-        existingItem.quantity += 1;
-
-      } else {
-
-        cart.push({
-
-          name: name,
-
-          price: 10,
-
-          quantity: 1
-
-        });
-
-      }
-
-      localStorage.setItem('motionGodCart', JSON.stringify(cart));
-
-      updateCart();
-
-      alert(name + ' added to your cart!');
-
-    });
+    cart = JSON.parse(savedCart);
 
   }
 
-});
+  if (!Array.isArray(cart)) {
+
+    cart = [];
+
+  }
+
+} catch (error) {
+
+  console.error('Cart loading error:', error);
+
+  cart = [];
+
+}
+
+function saveCart() {
+
+  try {
+
+    localStorage.setItem('motionGodCart', JSON.stringify(cart));
+
+  } catch (error) {
+
+    console.error('Cart saving error:', error);
+
+  }
+
+}
 
 function updateCart() {
 
@@ -195,6 +192,12 @@ function updateCart() {
   const cartEmpty = document.getElementById('cartEmpty');
 
   const cartTotal = document.getElementById('cartTotal');
+
+  if (!cartItems || !cartEmpty || !cartTotal) {
+
+    return;
+
+  }
 
   if (cart.length === 0) {
 
@@ -210,7 +213,7 @@ function updateCart() {
 
   cartEmpty.textContent = '';
 
-  cartItems.innerHTML = cart.map(item => `
+  cartItems.innerHTML = cart.map((item, index) => `
 
     <div class="card">
 
@@ -228,6 +231,18 @@ function updateCart() {
 
       </p>
 
+      <button
+
+        class="btn secondary"
+
+        type="button"
+
+        onclick="removeFromCart(${index})">
+
+        Remove
+
+      </button>
+
     </div>
 
   `).join('');
@@ -244,7 +259,83 @@ function updateCart() {
 
 }
 
+function addToCart(button) {
+
+  const product = button.closest('.card');
+
+  if (!product) {
+
+    return;
+
+  }
+
+  const nameElement = product.querySelector('h3');
+
+  if (!nameElement) {
+
+    return;
+
+  }
+
+  const name = nameElement.textContent.trim();
+
+  const existingItem = cart.find(item => item.name === name);
+
+  if (existingItem) {
+
+    existingItem.quantity += 1;
+
+  } else {
+
+    cart.push({
+
+      name: name,
+
+      price: 10,
+
+      quantity: 1
+
+    });
+
+  }
+
+  saveCart();
+
+  updateCart();
+
+  alert(name + ' added to your cart!');
+
+}
+
+function removeFromCart(index) {
+
+  cart.splice(index, 1);
+
+  saveCart();
+
+  updateCart();
+
+}
+
+document.querySelectorAll('button').forEach(button => {
+
+  if (button.textContent.trim() === 'Add to Cart') {
+
+    button.addEventListener('click', function() {
+
+      addToCart(this);
+
+    });
+
+  }
+
+});
+
 updateCart();
+
 </script>
+
+
+
 </body>
 </html>

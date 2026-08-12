@@ -132,6 +132,25 @@ footer{border-top:1px solid var(--line);padding:35px 0;color:var(--muted);font-s
 </div></footer>
 
 <script>
+const cart = [];
+
+document.querySelectorAll('.btn.primary').forEach(button => {
+
+  if (button.textContent.includes('Add to Cart')) {
+
+    button.addEventListener('click', () => {
+
+      const product = button.closest('.card');
+
+      const name = product.querySelector('h3').textContent;
+
+      alert(name + ' added to your cart!');
+
+    });
+
+  }
+
+});
 document.getElementById('interestForm').addEventListener('submit', function(e){
   e.preventDefault();
   const data = {
